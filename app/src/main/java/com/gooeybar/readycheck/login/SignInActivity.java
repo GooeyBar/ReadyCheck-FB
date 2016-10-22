@@ -1,4 +1,5 @@
-package com.gooeybar.readycheck;
+package com.gooeybar.readycheck.login;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.gooeybar.readycheck.R;
+import com.gooeybar.readycheck.base.BaseActivity;
+import com.gooeybar.readycheck.lobby.LobbyActivity;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -17,7 +21,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.games.Games;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -25,10 +28,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-import com.crejaud.tech_company_clicker.R;
-import com.crejaud.tech_company_clicker.clicker.ClickerActivity;
-import com.crejaud.tech_company_clicker.menu.MenuActivity;
 
 /**
  * Demonstrate Firebase Authentication using a Google ID Token.
@@ -60,12 +59,12 @@ public class SignInActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google);
 
-        MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_app_id));
+        /*MobileAds.initialize(getApplicationContext(), getResources().getString(R.string.banner_ad_app_id));
 
         AdView mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-
+        */
         firebaseSignoutBugFlag = false;
 
         // Button listeners
@@ -209,7 +208,7 @@ public class SignInActivity extends BaseActivity implements
         hideProgressDialog();
         if (user != null) {
             Log.d("LOGIN", "Updating UI");
-            Intent clickerIntent = new Intent(this, MenuActivity.class);
+            Intent clickerIntent = new Intent(this, LobbyActivity.class);
             clickerIntent.putExtra(getResources().getString(R.string.intent_extra_unique_id), user.getUid());
             startActivityForResult(clickerIntent, RC_SIGN_OUT);
         }
