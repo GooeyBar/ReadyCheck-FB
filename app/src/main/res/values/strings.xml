@@ -33,6 +33,7 @@
     <string name="hint_password">Password</string>
 
     <string name="intent_extra_unique_id">unique_id</string>
+    <string name="intent_extra_group_id">group_id</string>
 
     <!--<string name="status_fraction">%s/%s Ready</string>-->
     <string name="join_group">Join Group</string>
@@ -41,4 +42,6 @@
     <string name="firebase_db_members">members</string>
     <string name="firebase_db_group_name">group_name</string>
     <string name="firebase_db_group_ready_status">ready_status</string>
+    <string name="firebase_db_ready_status">ready_status</string>
+    <string name="firebase_db_display_name">display_name</string>
 </resources>

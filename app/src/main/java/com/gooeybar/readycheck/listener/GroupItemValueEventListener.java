@@ -42,7 +42,7 @@ public class GroupItemValueEventListener implements ValueEventListener {
         Iterator<DataSnapshot> membersDataSnapshotIterator = membersDataSnapshot.getChildren().iterator();
         long numReadyMembers = 0;
         while (membersDataSnapshotIterator.hasNext()) {
-            boolean isMemberReady = membersDataSnapshotIterator.next().getValue(String.class).equals(State.READY.getStatus());
+            boolean isMemberReady = membersDataSnapshotIterator.next().child(resources.getString(R.string.firebase_db_ready_status)).getValue(String.class).equals(State.READY.getStatus());
             if (isMemberReady)
                 numReadyMembers++;
         }
@@ -54,6 +54,7 @@ public class GroupItemValueEventListener implements ValueEventListener {
         groupItem.setNumMembers(numMembers);
         groupItem.setNumReadyMembers(numReadyMembers);
         groupItem.setReadyState(readyState);
+        groupItem.setGroupId(dataSnapshot.getKey());
 
         adapter.notifyDataSetChanged();
     }

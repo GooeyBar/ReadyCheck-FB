@@ -3,27 +3,27 @@ package com.gooeybar.readycheck.lobby;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.InputType;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gooeybar.readycheck.R;
 import com.gooeybar.readycheck.base.BaseActivity;
+import com.gooeybar.readycheck.group.GroupActivity;
 import com.gooeybar.readycheck.listener.GroupItemValueEventListener;
 import com.gooeybar.readycheck.model.GroupItem;
 import com.gooeybar.readycheck.model.State;
@@ -38,8 +38,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
+
+import static com.gooeybar.readycheck.login.SignInActivity.RC_SIGN_OUT;
 
 public class LobbyActivity extends BaseActivity {
 
@@ -64,7 +65,7 @@ public class LobbyActivity extends BaseActivity {
 
         groupListView = (ListView) findViewById(R.id.group_list_view);
 
-        adapter = new GroupListAdapter();
+        adapter = new GroupArrayAdapter();
         groupListView.setAdapter(adapter);
 
         // Set up firebase references
@@ -138,15 +139,24 @@ public class LobbyActivity extends BaseActivity {
         builder.setMessage("Type in the unique 4 digit group id!");
 
         // Set up the input
+        LinearLayout layout = new LinearLayout(getApplicationContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+
         final EditText inputGroupId = new EditText(this);
         inputGroupId.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(inputGroupId);
+        final EditText inputDisplayName = new EditText(this);
+        inputDisplayName.setInputType(InputType.TYPE_CLASS_TEXT);
+        layout.addView(inputGroupId);
+        layout.addView(inputDisplayName);
+
+        builder.setView(layout);
 
         // Set up the buttons
         builder.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String groupId = inputGroupId.getText().toString();
+                final String displayName = inputDisplayName.getText().toString();
 
                 mGroupsRef.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -160,7 +170,8 @@ public class LobbyActivity extends BaseActivity {
                         mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).runTransaction(new Transaction.Handler() {
                             @Override
                             public Transaction.Result doTransaction(MutableData mutableData) {
-                                mutableData.setValue(State.NOT_READY.getStatus());
+                                mutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(State.NOT_READY.getStatus());
+                                mutableData.child(getResources().getString(R.string.firebase_db_display_name)).setValue(displayName);
                                 return Transaction.success(mutableData);
                             }
 
@@ -211,25 +222,34 @@ public class LobbyActivity extends BaseActivity {
         builder.setMessage("Type in a group name!");
 
         // Set up the input
+        LinearLayout layout = new LinearLayout(getApplicationContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+
         final EditText inputGroupName = new EditText(this);
         inputGroupName.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(inputGroupName);
+        final EditText inputDisplayName = new EditText(this);
+        inputDisplayName.setInputType(InputType.TYPE_CLASS_TEXT);
+        layout.addView(inputGroupName);
+        layout.addView(inputDisplayName);
+
+        builder.setView(layout);
 
         // Set up the buttons
         builder.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String groupName = inputGroupName.getText().toString();
+                final String displayName = inputDisplayName.getText().toString();
 
                 mGroupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        // generate random key with no vowels of size 12
+                        // generate random key with no vowels of size 5
                         while (true) {
-                            char[] chars = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ123456789".toCharArray();
+                            char[] chars = "bcdfghjklmnpqrstvwxyz0123456789".toCharArray();
                             StringBuilder sb = new StringBuilder();
                             Random random = new Random();
-                            for (int i = 0; i < 12; i++) {
+                            for (int i = 0; i < 5; i++) {
                                 char c = chars[random.nextInt(chars.length)];
                                 sb.append(c);
                             }
@@ -240,7 +260,9 @@ public class LobbyActivity extends BaseActivity {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         mutableData.child(getResources().getString(R.string.firebase_db_group_name)).setValue(groupName);
-                                        mutableData.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).setValue(State.INACTIVE.getStatus());
+                                        MutableData memberIdMutableData = mutableData.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid);
+                                        memberIdMutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(State.INACTIVE.getStatus());
+                                        memberIdMutableData.child(getResources().getString(R.string.firebase_db_display_name)).setValue(displayName);
                                         mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.INACTIVE.getStatus());
 
                                         return Transaction.success(mutableData);
@@ -248,7 +270,7 @@ public class LobbyActivity extends BaseActivity {
 
                                     @Override
                                     public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
+                                        Parse.
                                     }
                                 });
                                 mMembersRef.child(firebaseUid).runTransaction(new Transaction.Handler() {
@@ -312,8 +334,20 @@ public class LobbyActivity extends BaseActivity {
         }
     }
 
-    private class GroupListAdapter extends ArrayAdapter<GroupItem> {
-        public GroupListAdapter() {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_OUT) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d("LOGIN", "Sign out button clicked");
+                signOut();
+            }
+        }
+    }
+
+    private class GroupArrayAdapter extends ArrayAdapter<GroupItem> {
+        public GroupArrayAdapter() {
             super(LobbyActivity.this, R.layout.group_item, groups);
         }
 
@@ -322,7 +356,7 @@ public class LobbyActivity extends BaseActivity {
             if (view == null)
                 view = getLayoutInflater().inflate(R.layout.group_item, parent, false);
 
-            GroupItem groupItem = groups.get(position);
+            final GroupItem groupItem = groups.get(position);
 
             String groupName = groupItem.getGroupName();
             long numReadyMembers = groupItem.getNumReadyMembers();
@@ -340,6 +374,16 @@ public class LobbyActivity extends BaseActivity {
 
             Button readyButton = (Button) view.findViewById(R.id.ready_button);
             Button notReadyButton = (Button) view.findViewById(R.id.not_ready_button);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent clickerIntent = new Intent(LobbyActivity.this, GroupActivity.class);
+                    clickerIntent.putExtra(getResources().getString(R.string.intent_extra_unique_id), firebaseUid);
+                    clickerIntent.putExtra(getResources().getString(R.string.intent_extra_group_id), groupItem.getGroupId());
+                    startActivityForResult(clickerIntent, RC_SIGN_OUT);
+                }
+            });
 
             return view;
         }

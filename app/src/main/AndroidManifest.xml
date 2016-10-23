@@ -16,7 +16,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".base.BaseActivity" />
-        <activity android:name=".lobby.LobbyActivity"></activity>
+        <activity android:name=".lobby.LobbyActivity" />
+        <activity android:name=".group.GroupActivity"></activity>
     </application>
 
 </manifest>

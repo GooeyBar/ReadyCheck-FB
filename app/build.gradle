@@ -33,6 +33,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:9.2.1'
     compile 'com.google.android.gms:play-services-games:9.2.1'
     compile 'com.google.android.gms:play-services-ads:9.2.1'
+    compile 'com.parse.bolts:bolts-android:1.+'
+    compile 'com.parse:parse-android:1.+'
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:design:25.0.0'
 }

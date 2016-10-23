@@ -10,19 +10,22 @@ public class GroupItem {
     private long numReadyMembers;
     private long numMembers;
     private State readyState;
+    private String groupId;
 
     public GroupItem() {
         this.groupName = "";
         this.numReadyMembers = 0;
         this.numMembers = 0;
         this.readyState = State.INACTIVE;
+        this.groupId = "";
     }
 
-    public GroupItem(String groupName, long numReadyMembers, long numMembers, String readyState) {
+    public GroupItem(String groupName, long numReadyMembers, long numMembers, String readyState, String groupId) {
         this.groupName = groupName;
         this.numReadyMembers = numReadyMembers;
         this.numMembers = numMembers;
         setReadyState(readyState);
+        this.groupId = groupId;
     }
 
     public long getNumReadyMembers() {
@@ -68,4 +71,11 @@ public class GroupItem {
         this.groupName = groupName;
     }
 
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 }
