@@ -178,6 +178,8 @@ public class LobbyActivity extends BaseActivity {
                             return;
                         }
 
+                        FirebaseMessaging.getInstance().subscribeToTopic(groupId);
+
                         mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).runTransaction(new Transaction.Handler() {
                             @Override
                             public Transaction.Result doTransaction(MutableData mutableData) {
@@ -204,8 +206,6 @@ public class LobbyActivity extends BaseActivity {
                             }
                         });
                         dataSnapshot.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid);
-
-                        FirebaseMessaging.getInstance().subscribeToTopic(groupId);
 
                         dialogInterface.dismiss();
                     }
@@ -248,7 +248,7 @@ public class LobbyActivity extends BaseActivity {
         builder.setView(layout);
 
         // Set up the buttons
-        builder.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("CREATE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String groupName = inputGroupName.getText().toString();

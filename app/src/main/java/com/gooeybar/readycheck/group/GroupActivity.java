@@ -88,7 +88,21 @@ public class GroupActivity extends BaseActivity {
 
                     @Override
                     public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        String id = (int)(Math.random() * 5000) + "";
+                        mRootRef.child("notificationRequests").child(id).runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                mutableData.child("username").setValue(groupId);
+                                mutableData.child("message").setValue("READY CHECK FOR " + groupId);
 
+                                return Transaction.success(mutableData);
+                            }
+
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                            }
+                        });
                     }
                 });
             }
@@ -154,7 +168,7 @@ public class GroupActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String groupName = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_name)).getValue(String.class);
 
-                setTitle(groupName + ":" + groupId);
+                setTitle(groupName + "   -   " + groupId);
 
                 members.clear();
 
