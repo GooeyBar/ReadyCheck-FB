@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -34,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,6 +44,10 @@ import java.util.List;
 import java.util.Random;
 
 import static com.gooeybar.readycheck.login.SignInActivity.RC_SIGN_OUT;
+import static com.gooeybar.readycheck.model.State.INACTIVE;
+import static com.gooeybar.readycheck.model.State.NOT_READY;
+import static com.gooeybar.readycheck.model.State.PENDING;
+import static com.gooeybar.readycheck.model.State.READY;
 
 public class LobbyActivity extends BaseActivity {
 
@@ -110,8 +117,12 @@ public class LobbyActivity extends BaseActivity {
                 while(groupIdDataSnapshotIterator.hasNext()) {
                     GroupItem groupItem = new GroupItem();
 
+                    DataSnapshot groupIdDataSnapshot = groupIdDataSnapshotIterator.next();
+
                     // listener for group details
-                    mGroupsRef.child(groupIdDataSnapshotIterator.next().getKey()).addValueEventListener(new GroupItemValueEventListener(groupItem, adapter, getResources()));
+                    mGroupsRef
+                            .child(groupIdDataSnapshot.getKey())
+                            .addValueEventListener(new GroupItemValueEventListener(groupItem, adapter, getResources(), mGroupsRef.child(groupIdDataSnapshot.getKey())));
 
                     groups.add(groupItem);
                 }
@@ -170,7 +181,7 @@ public class LobbyActivity extends BaseActivity {
                         mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).runTransaction(new Transaction.Handler() {
                             @Override
                             public Transaction.Result doTransaction(MutableData mutableData) {
-                                mutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(State.NOT_READY.getStatus());
+                                mutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(NOT_READY.getStatus());
                                 mutableData.child(getResources().getString(R.string.firebase_db_display_name)).setValue(displayName);
                                 return Transaction.success(mutableData);
                             }
@@ -193,6 +204,8 @@ public class LobbyActivity extends BaseActivity {
                             }
                         });
                         dataSnapshot.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid);
+
+                        FirebaseMessaging.getInstance().subscribeToTopic(groupId);
 
                         dialogInterface.dismiss();
                     }
@@ -256,21 +269,23 @@ public class LobbyActivity extends BaseActivity {
                             final String key = sb.toString();
 
                             if (dataSnapshot.child(key).getValue() == null) {
+
+                                FirebaseMessaging.getInstance().subscribeToTopic(key);
+
                                 mGroupsRef.child(key).runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         mutableData.child(getResources().getString(R.string.firebase_db_group_name)).setValue(groupName);
                                         MutableData memberIdMutableData = mutableData.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid);
-                                        memberIdMutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(State.INACTIVE.getStatus());
+                                        memberIdMutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(INACTIVE.getStatus());
                                         memberIdMutableData.child(getResources().getString(R.string.firebase_db_display_name)).setValue(displayName);
-                                        mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.INACTIVE.getStatus());
+                                        mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(INACTIVE.getStatus());
 
                                         return Transaction.success(mutableData);
                                     }
 
                                     @Override
                                     public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                                        Parse.
                                     }
                                 });
                                 mMembersRef.child(firebaseUid).runTransaction(new Transaction.Handler() {
@@ -363,8 +378,7 @@ public class LobbyActivity extends BaseActivity {
             long numMembers = groupItem.getNumMembers();
 
             // represent in format : <numReadyMembers>/<numMembers> Ready
-            //String statusFraction = String.format(getString(R.string.status_fraction), String.format(Locale.US, "%,d", numReadyMembers), String.format(Locale.US, "%,d", numMembers));
-            String statusFraction = "";
+            String statusFraction = numReadyMembers + "/" + numMembers + " Ready";
 
             TextView groupNameTextView = (TextView) view.findViewById(R.id.group_name_text);
             groupNameTextView.setText(groupName);
@@ -372,8 +386,81 @@ public class LobbyActivity extends BaseActivity {
             TextView statusFractionTextView = (TextView) view.findViewById(R.id.status_fraction_text);
             statusFractionTextView.setText(statusFraction);
 
-            Button readyButton = (Button) view.findViewById(R.id.ready_button);
-            Button notReadyButton = (Button) view.findViewById(R.id.not_ready_button);
+            ImageButton readyImageButton = (ImageButton) view.findViewById(R.id.ready_button);
+            ImageButton notReadyImageButton = (ImageButton) view.findViewById(R.id.not_ready_button);
+
+            readyImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mGroupsRef
+                            .child(groupItem.getGroupId())
+                            .child(getResources().getString(R.string.firebase_db_members))
+                            .child(firebaseUid)
+                            .child(getResources().getString(R.string.firebase_db_ready_status))
+                            .runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            mutableData.setValue(State.READY.getStatus());
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+                }
+            });
+
+            notReadyImageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mGroupsRef
+                            .child(groupItem.getGroupId())
+                            .child(getResources().getString(R.string.firebase_db_members))
+                            .child(firebaseUid)
+                            .child(getResources().getString(R.string.firebase_db_ready_status))
+                            .runTransaction(new Transaction.Handler() {
+                                @Override
+                                public Transaction.Result doTransaction(MutableData mutableData) {
+                                    mutableData.setValue(State.NOT_READY.getStatus());
+
+                                    return Transaction.success(mutableData);
+                                }
+
+                                @Override
+                                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                                }
+                            });
+                }
+            });
+
+            ImageView groupStatusImage = (ImageView) view.findViewById(R.id.status_image);
+
+            switch(groupItem.getReadyState()) {
+                case READY:
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_green));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+                case NOT_READY:
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_red));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+                case PENDING:
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_yellow));
+                    readyImageButton.setVisibility(View.VISIBLE);
+                    notReadyImageButton.setVisibility(View.VISIBLE);
+                    break;
+                case INACTIVE:
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_grey));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+            }
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -4,18 +4,21 @@
 android:orientation="horizontal" android:layout_width="match_parent"
 android:layout_height="80dp"
 android:padding="10dp"
-android:weightSum="10">
+android:weightSum="20">
 
     <ImageView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:gravity="center"
+        android:adjustViewBounds="true"
         android:id="@+id/status_image"/>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="7"
+        android:layout_weight="13"
+        android:layout_gravity="start"
         android:orientation="vertical">
 
         <TextView
@@ -34,16 +37,24 @@ android:weightSum="10">
 
     </LinearLayout>
 
-    <Button
+    <ImageButton
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="3"
+        android:src="@drawable/ic_check_circle_black_24dp"
+        android:scaleType="fitCenter"
+        android:background="@null"
+        android:visibility="invisible"
         android:id="@+id/ready_button"/>
 
-    <Button
+    <ImageButton
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="3"
+        android:scaleType="fitCenter"
+        android:background="@null"
+        android:visibility="invisible"
+        android:src="@drawable/ic_cancel_black_24dp"
         android:id="@+id/not_ready_button"/>
 
 </LinearLayout>

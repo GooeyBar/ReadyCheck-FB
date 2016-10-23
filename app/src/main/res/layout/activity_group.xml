@@ -8,17 +8,53 @@
     android:layout_height="match_parent"
     tools:context="com.gooeybar.readycheck.group.GroupActivity">
 
-    <ListView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:id="@+id/group_members_list_view"/>
+        android:orientation="vertical"
+        android:weightSum="10">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_check_circle_black_24dp"
+                android:scaleType="fitCenter"
+                android:background="@null"
+                android:visibility="invisible"
+                android:id="@+id/accept_ready_check_button"/>
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_cancel_black_24dp"
+                android:scaleType="fitCenter"
+                android:background="@null"
+                android:visibility="invisible"
+                android:id="@+id/decline_ready_check_button"/>
+        </LinearLayout>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:id="@+id/group_members_list_view"/>
+    </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:src="@drawable/ic_add_black_24dp"
+        android:src="@drawable/readycheck_24dp"
         app:fabSize="normal"
         android:id="@+id/group_rcheck_fab"
         android:layout_margin="@dimen/activity_horizontal_margin"

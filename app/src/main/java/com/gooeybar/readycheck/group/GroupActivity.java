@@ -1,9 +1,11 @@
 package com.gooeybar.readycheck.group;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -11,15 +13,20 @@ import android.widget.TextView;
 import com.gooeybar.readycheck.R;
 import com.gooeybar.readycheck.base.BaseActivity;
 import com.gooeybar.readycheck.model.MemberItem;
+import com.gooeybar.readycheck.model.State;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static com.gooeybar.readycheck.model.State.READY;
 
 public class GroupActivity extends BaseActivity {
     private ListView membersListView;
@@ -28,6 +35,10 @@ public class GroupActivity extends BaseActivity {
 
     private String firebaseUid;
     private String groupId;
+
+    private FloatingActionButton initReadyCheckButton;
+
+    private ImageButton readyImageButton, notReadyImageButton;
 
     private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
     private DatabaseReference mGroupsRef;
@@ -41,6 +52,8 @@ public class GroupActivity extends BaseActivity {
         firebaseUid = getIntent().getExtras().getString(getString(R.string.intent_extra_unique_id));
         groupId = getIntent().getExtras().getString(getString(R.string.intent_extra_group_id));
 
+        setTitle(groupId);
+
         membersListView = (ListView) findViewById(R.id.group_members_list_view);
         members = new ArrayList<MemberItem>();
         adapter = new MemberArrayAdapter();
@@ -50,6 +63,88 @@ public class GroupActivity extends BaseActivity {
         mGroupsRef = mRootRef.child(getResources().getString(R.string.firebase_db_groups));
         mMembersRef = mRootRef.child(getResources().getString(R.string.firebase_db_members));
 
+        initReadyCheckButton = (FloatingActionButton) findViewById(R.id.group_rcheck_fab);
+
+        initReadyCheckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mGroupsRef.child(groupId).runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        // set group ready status to PENDING
+                        mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.PENDING.getStatus());
+
+                        MutableData membersMutableData = mutableData.child(getResources().getString(R.string.firebase_db_members));
+                        Iterator<MutableData> membersMutableDataIterator = membersMutableData.getChildren().iterator();
+
+                        // set each member ready status to NOT_READY
+                        while (membersMutableDataIterator.hasNext()) {
+                            MutableData memberMutableData = membersMutableDataIterator.next();
+                            memberMutableData.child(getResources().getString(R.string.firebase_db_ready_status)).setValue(State.PENDING.getStatus());
+                        }
+
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                    }
+                });
+            }
+        });
+
+        readyImageButton = (ImageButton) findViewById(R.id.accept_ready_check_button);
+        notReadyImageButton = (ImageButton) findViewById(R.id.decline_ready_check_button);
+
+        readyImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mGroupsRef
+                        .child(groupId)
+                        .child(getResources().getString(R.string.firebase_db_members))
+                        .child(firebaseUid)
+                        .child(getResources().getString(R.string.firebase_db_ready_status))
+                        .runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                mutableData.setValue(State.READY.getStatus());
+
+                                return Transaction.success(mutableData);
+                            }
+
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                            }
+                        });
+            }
+        });
+
+        notReadyImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mGroupsRef
+                        .child(groupId)
+                        .child(getResources().getString(R.string.firebase_db_members))
+                        .child(firebaseUid)
+                        .child(getResources().getString(R.string.firebase_db_ready_status))
+                        .runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                mutableData.setValue(State.NOT_READY.getStatus());
+
+                                return Transaction.success(mutableData);
+                            }
+
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                            }
+                        });
+            }
+        });
+
         getMembers();
     }
 
@@ -57,7 +152,14 @@ public class GroupActivity extends BaseActivity {
         mGroupsRef.child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                String groupName = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_name)).getValue(String.class);
+
+                setTitle(groupName + ":" + groupId);
+
                 members.clear();
+
+                boolean hasPendingStatuses = false;
+                boolean hasNotReadyStatuses = false;
 
                 Iterator<DataSnapshot> membersDataSnapshotIterator = dataSnapshot.child(getResources().getString(R.string.firebase_db_members)).getChildren().iterator();
                 while (membersDataSnapshotIterator.hasNext()) {
@@ -69,6 +171,50 @@ public class GroupActivity extends BaseActivity {
                     memberItem.setMemberName(memberDisplayName);
                     members.add(memberItem);
                     adapter.notifyDataSetChanged();
+
+                    hasPendingStatuses = hasPendingStatuses || memberReadyStatus.equals(State.PENDING.getStatus());
+                    hasNotReadyStatuses = hasNotReadyStatuses || memberReadyStatus.equals(State.NOT_READY.getStatus());
+                }
+
+                if (hasPendingStatuses) {
+                    mGroupsRef.child(groupId).runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.PENDING.getStatus());
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+                }
+                else if (hasNotReadyStatuses) {
+                    mGroupsRef.child(groupId).runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.NOT_READY.getStatus());
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+                }
+
+                String readyState = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_ready_status)).getValue(String.class);
+
+                if (State.PENDING.getStatus().equals(readyState)) {
+                    readyImageButton.setVisibility(View.VISIBLE);
+                    notReadyImageButton.setVisibility(View.VISIBLE);
+                } else {
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -96,6 +242,29 @@ public class GroupActivity extends BaseActivity {
             memberDisplayNameText.setText(memberItem.getMemberName());
 
             ImageView memberStatusImage = (ImageView) view.findViewById(R.id.status_image);
+
+            switch(memberItem.getReadyState()) {
+                case READY:
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_green));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+                case NOT_READY:
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_red));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+                case PENDING:
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_yellow));
+                    readyImageButton.setVisibility(View.VISIBLE);
+                    notReadyImageButton.setVisibility(View.VISIBLE);
+                    break;
+                case INACTIVE:
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_grey));
+                    readyImageButton.setVisibility(View.INVISIBLE);
+                    notReadyImageButton.setVisibility(View.INVISIBLE);
+                    break;
+            }
 
             return view;
         }

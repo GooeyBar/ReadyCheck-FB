@@ -1,5 +1,7 @@
 package com.gooeybar.readycheck.model;
 
+import android.graphics.drawable.Drawable;
+
 /**
  * Created by creja_000 on 10/22/2016.
  */

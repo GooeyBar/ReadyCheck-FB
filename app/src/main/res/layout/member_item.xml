@@ -4,19 +4,21 @@
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="60dp"
     android:padding="10dp"
-    android:weightSum="5">
+    android:weightSum="20">
 
     <ImageView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:gravity="center"
+        android:adjustViewBounds="true"
         android:id="@+id/status_image"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:text="Member Name"
-        android:layout_weight="4"
+        android:layout_weight="19"
         android:gravity="center"
         android:id="@+id/member_name_text" />
 
