@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -46,16 +45,13 @@ import java.util.Random;
 import static com.gooeybar.readycheck.login.SignInActivity.RC_SIGN_OUT;
 import static com.gooeybar.readycheck.model.State.INACTIVE;
 import static com.gooeybar.readycheck.model.State.NOT_READY;
-import static com.gooeybar.readycheck.model.State.PENDING;
-import static com.gooeybar.readycheck.model.State.READY;
 
 public class LobbyActivity extends BaseActivity {
 
+    private static final String GROUP_ID_CHARACTERS = "bcdfghjklmnpqrstvwxyz0123456789";
+    private static final int GROUP_ID_LENGTH = 5;
+
     private List<GroupItem> groups = new ArrayList<>();
-
-    private ListView groupListView;
-
-    private FloatingActionButton newGroupFab;
 
     private ArrayAdapter<GroupItem> adapter;
 
@@ -70,7 +66,7 @@ public class LobbyActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
 
-        groupListView = (ListView) findViewById(R.id.group_list_view);
+        ListView groupListView = (ListView) findViewById(R.id.group_list_view);
 
         adapter = new GroupArrayAdapter();
         groupListView.setAdapter(adapter);
@@ -81,7 +77,7 @@ public class LobbyActivity extends BaseActivity {
 
         firebaseUid = getIntent().getExtras().getString(getString(R.string.intent_extra_unique_id));
 
-        newGroupFab = (FloatingActionButton) findViewById(R.id.new_group_fab);
+        FloatingActionButton newGroupFab = (FloatingActionButton) findViewById(R.id.new_group_fab);
 
         newGroupFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,24 +142,32 @@ public class LobbyActivity extends BaseActivity {
 
     private void joinGroupDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Join a group!");
-        builder.setMessage("Type in the unique 4 digit group id!");
+        builder.setTitle(R.string.join_group_title);
 
         // Set up the input
         LinearLayout layout = new LinearLayout(getApplicationContext());
         layout.setOrientation(LinearLayout.VERTICAL);
 
+        float sizeInDp = getResources().getDimension(R.dimen.activity_horizontal_margin)/2;
+
+        float scale = getResources().getDisplayMetrics().density;
+        int dpAsPixels = (int) (sizeInDp*scale + 0.5f);
+
+        layout.setPadding(dpAsPixels, dpAsPixels, dpAsPixels, dpAsPixels);
+
         final EditText inputGroupId = new EditText(this);
         inputGroupId.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputGroupId.setHint(R.string.group_id_hint);
         final EditText inputDisplayName = new EditText(this);
         inputDisplayName.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputDisplayName.setHint(R.string.display_name_hint);
         layout.addView(inputGroupId);
         layout.addView(inputDisplayName);
 
         builder.setView(layout);
 
         // Set up the buttons
-        builder.setPositiveButton("JOIN", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.join, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String groupId = inputGroupId.getText().toString();
@@ -174,7 +178,7 @@ public class LobbyActivity extends BaseActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() == null) {
                             inputGroupId.setText("");
-                            Toast.makeText(LobbyActivity.this, "Please type a valid group id", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LobbyActivity.this, R.string.join_group_not_found, Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -219,7 +223,7 @@ public class LobbyActivity extends BaseActivity {
             }
         });
 
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
@@ -231,24 +235,31 @@ public class LobbyActivity extends BaseActivity {
 
     private void createGroupDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Create a group!");
-        builder.setMessage("Type in a group name!");
+        builder.setTitle(R.string.create_group_title);
 
         // Set up the input
         LinearLayout layout = new LinearLayout(getApplicationContext());
         layout.setOrientation(LinearLayout.VERTICAL);
+        float sizeInDp = getResources().getDimension(R.dimen.activity_horizontal_margin)/2;
+
+        float scale = getResources().getDisplayMetrics().density;
+        int dpAsPixels = (int) (sizeInDp*scale + 0.5f);
+
+        layout.setPadding(dpAsPixels, dpAsPixels, dpAsPixels, dpAsPixels);
 
         final EditText inputGroupName = new EditText(this);
         inputGroupName.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputGroupName.setHint(R.string.group_name_hint);
         final EditText inputDisplayName = new EditText(this);
         inputDisplayName.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputDisplayName.setHint(R.string.display_name_hint);
         layout.addView(inputGroupName);
         layout.addView(inputDisplayName);
 
         builder.setView(layout);
 
         // Set up the buttons
-        builder.setPositiveButton("CREATE", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String groupName = inputGroupName.getText().toString();
@@ -259,10 +270,10 @@ public class LobbyActivity extends BaseActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // generate random key with no vowels of size 5
                         while (true) {
-                            char[] chars = "bcdfghjklmnpqrstvwxyz0123456789".toCharArray();
+                            char[] chars = GROUP_ID_CHARACTERS.toCharArray();
                             StringBuilder sb = new StringBuilder();
                             Random random = new Random();
-                            for (int i = 0; i < 5; i++) {
+                            for (int i = 0; i < GROUP_ID_LENGTH; i++) {
                                 char c = chars[random.nextInt(chars.length)];
                                 sb.append(c);
                             }
@@ -317,7 +328,7 @@ public class LobbyActivity extends BaseActivity {
             }
         });
 
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
@@ -386,8 +397,8 @@ public class LobbyActivity extends BaseActivity {
             TextView statusFractionTextView = (TextView) view.findViewById(R.id.status_fraction_text);
             statusFractionTextView.setText(statusFraction);
 
-            ImageButton readyImageButton = (ImageButton) view.findViewById(R.id.ready_button);
-            ImageButton notReadyImageButton = (ImageButton) view.findViewById(R.id.not_ready_button);
+            final ImageButton readyImageButton = (ImageButton) view.findViewById(R.id.ready_button);
+            final ImageButton notReadyImageButton = (ImageButton) view.findViewById(R.id.not_ready_button);
 
             readyImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -441,22 +452,22 @@ public class LobbyActivity extends BaseActivity {
 
             switch(groupItem.getReadyState()) {
                 case READY:
-                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_green));
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.ready_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;
                 case NOT_READY:
-                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_red));
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.not_ready_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;
                 case PENDING:
-                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_yellow));
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.pending_circle));
                     readyImageButton.setVisibility(View.VISIBLE);
                     notReadyImageButton.setVisibility(View.VISIBLE);
                     break;
                 case INACTIVE:
-                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.dot_grey));
+                    groupStatusImage.setImageDrawable(getDrawable(R.drawable.inactive_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;
@@ -469,6 +480,28 @@ public class LobbyActivity extends BaseActivity {
                     clickerIntent.putExtra(getResources().getString(R.string.intent_extra_unique_id), firebaseUid);
                     clickerIntent.putExtra(getResources().getString(R.string.intent_extra_group_id), groupItem.getGroupId());
                     startActivityForResult(clickerIntent, RC_SIGN_OUT);
+                }
+            });
+
+            mGroupsRef.child(groupItem.getGroupId()).child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).child(getResources().getString(R.string.firebase_db_ready_status)).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String readyState = dataSnapshot.getValue(String.class);
+                    if (State.READY.getStatus().equals(readyState)) {
+                        readyImageButton.setImageResource(R.drawable.ic_check_circle_green_24dp);
+                        notReadyImageButton.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    } else if (State.NOT_READY.getStatus().equals(readyState)) {
+                        readyImageButton.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                        notReadyImageButton.setImageResource(R.drawable.ic_cancel_red_24dp);
+                    } else {
+                        readyImageButton.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                        notReadyImageButton.setImageResource(R.drawable.ic_cancel_black_24dp);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
             });
 

@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.gooeybar.readycheck.model.State.READY;
-
 public class GroupActivity extends BaseActivity {
     private ListView membersListView;
     private ArrayAdapter<MemberItem> adapter;
@@ -230,6 +228,19 @@ public class GroupActivity extends BaseActivity {
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                 }
+
+                String myReadyState = dataSnapshot.child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).child(getResources().getString(R.string.firebase_db_ready_status)).getValue(String.class);
+
+                if (State.READY.getStatus().equals(myReadyState)) {
+                    readyImageButton.setImageResource(R.drawable.ic_check_circle_green_24dp);
+                    notReadyImageButton.setImageResource(R.drawable.ic_cancel_black_24dp);
+                } else if (State.NOT_READY.getStatus().equals(myReadyState)) {
+                    readyImageButton.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                    notReadyImageButton.setImageResource(R.drawable.ic_cancel_red_24dp);
+                } else {
+                    readyImageButton.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                    notReadyImageButton.setImageResource(R.drawable.ic_cancel_black_24dp);
+                }
             }
 
             @Override
@@ -259,22 +270,22 @@ public class GroupActivity extends BaseActivity {
 
             switch(memberItem.getReadyState()) {
                 case READY:
-                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_green));
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.ready_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;
                 case NOT_READY:
-                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_red));
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.not_ready_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;
                 case PENDING:
-                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_yellow));
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.pending_circle));
                     readyImageButton.setVisibility(View.VISIBLE);
                     notReadyImageButton.setVisibility(View.VISIBLE);
                     break;
                 case INACTIVE:
-                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.dot_grey));
+                    memberStatusImage.setImageDrawable(getDrawable(R.drawable.inactive_circle));
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                     break;

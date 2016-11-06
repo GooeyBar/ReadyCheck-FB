@@ -35,8 +35,20 @@
     <string name="intent_extra_unique_id">unique_id</string>
     <string name="intent_extra_group_id">group_id</string>
 
-    <!--<string name="status_fraction">%s/%s Ready</string>-->
     <string name="join_group">Join Group</string>
+
+    <string name="create_group_title">Create a Group</string>
+    <string name="group_name_hint">Group name</string>
+    <string name="display_name_hint">Display name</string>
+    <string name="create">Create</string>
+
+    <string name="join_group_title">Join a Group</string>
+    <string name="group_id_hint">Group ID</string>
+    <string name="join">Join</string>
+
+    <string name="join_group_not_found">Could not find group.</string>
+
+    <string name="cancel">Cancel</string>
 
     <string name="firebase_db_groups">groups</string>
     <string name="firebase_db_members">members</string>

@@ -6,12 +6,11 @@ android:layout_height="80dp"
 android:padding="10dp"
 android:weightSum="20">
 
-    <ImageView
+    <com.gooeybar.readycheck.custom_views.SquareImageView
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center"
-        android:adjustViewBounds="true"
+        android:layout_gravity="center"
         android:id="@+id/status_image"/>
 
     <LinearLayout

@@ -16,10 +16,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Iterator;
 
-/**
- * Created by creja_000 on 10/22/2016.
- */
-
 public class GroupItemValueEventListener implements ValueEventListener {
 
     private GroupItem groupItem;
