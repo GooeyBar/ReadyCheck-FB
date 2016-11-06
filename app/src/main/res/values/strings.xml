@@ -56,4 +56,6 @@
     <string name="firebase_db_group_ready_status">ready_status</string>
     <string name="firebase_db_ready_status">ready_status</string>
     <string name="firebase_db_display_name">display_name</string>
+
+    <string name="banner_ad_unit_id">ca-app-pub-7625520601546680/8785527259</string>
 </resources>

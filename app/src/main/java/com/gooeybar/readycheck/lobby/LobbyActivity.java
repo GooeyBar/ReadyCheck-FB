@@ -28,6 +28,9 @@ import com.gooeybar.readycheck.group.GroupActivity;
 import com.gooeybar.readycheck.listener.GroupItemValueEventListener;
 import com.gooeybar.readycheck.model.GroupItem;
 import com.gooeybar.readycheck.model.State;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -65,6 +68,8 @@ public class LobbyActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lobby);
+
+        setupAds();
 
         ListView groupListView = (ListView) findViewById(R.id.group_list_view);
 

@@ -18,6 +18,9 @@ import com.gooeybar.readycheck.base.BaseActivity;
 import com.gooeybar.readycheck.custom_views.ViewWeightAnimationWrapper;
 import com.gooeybar.readycheck.model.MemberItem;
 import com.gooeybar.readycheck.model.State;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,6 +55,8 @@ public class GroupActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
+
+        setupAds();
 
         firebaseUid = getIntent().getExtras().getString(getString(R.string.intent_extra_unique_id));
         groupId = getIntent().getExtras().getString(getString(R.string.intent_extra_group_id));
