@@ -1,17 +1,21 @@
 package com.gooeybar.readycheck.group;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gooeybar.readycheck.R;
 import com.gooeybar.readycheck.base.BaseActivity;
+import com.gooeybar.readycheck.custom_views.ViewWeightAnimationWrapper;
 import com.gooeybar.readycheck.model.MemberItem;
 import com.gooeybar.readycheck.model.State;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +41,8 @@ public class GroupActivity extends BaseActivity {
     private FloatingActionButton initReadyCheckButton;
 
     private ImageButton readyImageButton, notReadyImageButton;
+
+    private LinearLayout readyCheckLayout;
 
     private DatabaseReference mRootRef = FirebaseDatabase.getInstance().getReference();
     private DatabaseReference mGroupsRef;
@@ -157,6 +163,8 @@ public class GroupActivity extends BaseActivity {
             }
         });
 
+        readyCheckLayout = (LinearLayout) findViewById(R.id.ready_check_layout);
+
         getMembers();
     }
 
@@ -222,9 +230,24 @@ public class GroupActivity extends BaseActivity {
                 String readyState = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_ready_status)).getValue(String.class);
 
                 if (State.PENDING.getStatus().equals(readyState)) {
+                    ViewWeightAnimationWrapper animationWrapper = new ViewWeightAnimationWrapper(readyCheckLayout);
+                    Log.d("TEST", "Weight is currently: " + animationWrapper.getWeight());
+                    ObjectAnimator anim = ObjectAnimator.ofFloat(animationWrapper,
+                            "weight",
+                            animationWrapper.getWeight(),
+                            2f);
+                    anim.setDuration(2500);
+                    anim.start();
                     readyImageButton.setVisibility(View.VISIBLE);
                     notReadyImageButton.setVisibility(View.VISIBLE);
                 } else {
+                    ViewWeightAnimationWrapper animationWrapper = new ViewWeightAnimationWrapper(readyCheckLayout);
+                    ObjectAnimator anim = ObjectAnimator.ofFloat(animationWrapper,
+                            "weight",
+                            animationWrapper.getWeight(),
+                            0);
+                    anim.setDuration(2500);
+                    anim.start();
                     readyImageButton.setVisibility(View.INVISIBLE);
                     notReadyImageButton.setVisibility(View.INVISIBLE);
                 }

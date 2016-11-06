@@ -2,8 +2,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:orientation="horizontal" android:layout_width="match_parent"
-android:layout_height="80dp"
-android:padding="10dp"
+android:layout_height="wrap_content"
+android:padding="@dimen/activity_horizontal_margin"
 android:weightSum="20">
 
     <com.gooeybar.readycheck.custom_views.SquareImageView
