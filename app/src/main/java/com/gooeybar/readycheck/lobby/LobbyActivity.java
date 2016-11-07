@@ -145,6 +145,9 @@ public class LobbyActivity extends BaseActivity {
                     groups.add(groupItem);
                 }
 
+                // add empty list item
+                groups.add(new GroupItem());
+
                 adapter.notifyDataSetChanged();
             }
 
@@ -403,6 +406,22 @@ public class LobbyActivity extends BaseActivity {
 
             final GroupItem groupItem = groups.get(position);
 
+            TextView groupNameTextView = (TextView) view.findViewById(R.id.group_name_text);
+            TextView statusFractionTextView = (TextView) view.findViewById(R.id.status_fraction_text);
+            final ImageButton readyImageButton = (ImageButton) view.findViewById(R.id.ready_button);
+            final ImageButton notReadyImageButton = (ImageButton) view.findViewById(R.id.not_ready_button);
+            ImageView groupStatusImage = (ImageView) view.findViewById(R.id.status_image);
+
+            // this is the empty list item
+            if (groupItem.getGroupId().isEmpty()) {
+                groupNameTextView.setText("");
+                statusFractionTextView.setText("");
+                readyImageButton.setVisibility(View.INVISIBLE);
+                notReadyImageButton.setVisibility(View.INVISIBLE);
+                groupStatusImage.setVisibility(View.INVISIBLE);
+                return view;
+            }
+
             String groupName = groupItem.getGroupName();
             long numReadyMembers = groupItem.getNumReadyMembers();
             long numMembers = groupItem.getNumMembers();
@@ -410,14 +429,9 @@ public class LobbyActivity extends BaseActivity {
             // represent in format : <numReadyMembers>/<numMembers> Ready
             String statusFraction = numReadyMembers + "/" + numMembers + " Ready";
 
-            TextView groupNameTextView = (TextView) view.findViewById(R.id.group_name_text);
             groupNameTextView.setText(groupName);
 
-            TextView statusFractionTextView = (TextView) view.findViewById(R.id.status_fraction_text);
             statusFractionTextView.setText(statusFraction);
-
-            final ImageButton readyImageButton = (ImageButton) view.findViewById(R.id.ready_button);
-            final ImageButton notReadyImageButton = (ImageButton) view.findViewById(R.id.not_ready_button);
 
             readyImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -467,7 +481,7 @@ public class LobbyActivity extends BaseActivity {
                 }
             });
 
-            ImageView groupStatusImage = (ImageView) view.findViewById(R.id.status_image);
+            groupStatusImage.setVisibility(View.VISIBLE);
 
             switch(groupItem.getReadyState()) {
                 case READY:
