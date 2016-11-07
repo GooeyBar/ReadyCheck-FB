@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.FloatingActionButton;
 import android.text.InputType;
 import android.util.Log;
@@ -45,6 +46,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import io.github.yavski.fabspeeddial.FabSpeedDial;
+import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
+
 import static com.gooeybar.readycheck.login.SignInActivity.RC_SIGN_OUT;
 import static com.gooeybar.readycheck.model.State.INACTIVE;
 import static com.gooeybar.readycheck.model.State.NOT_READY;
@@ -82,12 +86,25 @@ public class LobbyActivity extends BaseActivity {
 
         firebaseUid = getIntent().getExtras().getString(getString(R.string.intent_extra_unique_id));
 
-        FloatingActionButton newGroupFab = (FloatingActionButton) findViewById(R.id.new_group_fab);
-
-        newGroupFab.setOnClickListener(new View.OnClickListener() {
+        FabSpeedDial fabSpeedDial = (FabSpeedDial) findViewById(R.id.fab_speed_dial);
+        fabSpeedDial.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
-            public void onClick(View view) {
-                createGroupDialog();
+            public boolean onPrepareMenu(NavigationMenu navigationMenu) {
+                return true;
+            }
+            @Override
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                // Handle item selection
+                switch (menuItem.getItemId()) {
+                    case R.id.join_group:
+                        joinGroupDialog();
+                        return true;
+                    case R.id.create_group:
+                        createGroupDialog();
+                        return true;
+                    default:
+                        return super.onMenuItemSelected(menuItem);
+                }
             }
         });
 
@@ -354,9 +371,6 @@ public class LobbyActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.join_group_button:
-                joinGroupDialog();
-                return true;
             case R.id.sign_out:
                 signOut();
                 return true;
