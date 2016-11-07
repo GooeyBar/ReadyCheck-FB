@@ -20,7 +20,7 @@
             android:layout_height="0dp"
             android:layout_weight="0"
             android:background="@color/background"
-            android:elevation="10dp"
+            android:elevation="6dp"
             android:orientation="horizontal"
             android:weightSum="2"
             android:id="@+id/ready_check_layout">
