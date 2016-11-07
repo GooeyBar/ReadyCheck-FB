@@ -3,6 +3,7 @@ package com.gooeybar.readycheck.group;
 import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.InputType;
@@ -163,7 +164,9 @@ public class GroupActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 groupName = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_name)).getValue(String.class);
 
-                setTitle(groupName + "   -   " + groupId);
+                setTitle(groupName);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+                    getSupportActionBar().setSubtitle("Group ID: " + groupId);
 
                 members.clear();
 
