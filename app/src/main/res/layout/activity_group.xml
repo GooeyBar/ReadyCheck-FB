@@ -19,28 +19,28 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0"
-            android:id="@+id/ready_check_layout"
+            android:background="@color/background"
+            android:elevation="10dp"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:weightSum="2"
+            android:id="@+id/ready_check_layout">
 
             <ImageButton
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/ic_check_circle_black_24dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:background="@null"
-                android:visibility="invisible"
+                android:layout_weight="1"
                 android:id="@+id/accept_ready_check_button"/>
 
             <ImageButton
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/ic_cancel_black_24dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:background="@null"
-                android:visibility="invisible"
+                android:layout_weight="1"
                 android:id="@+id/decline_ready_check_button"/>
         </LinearLayout>
 

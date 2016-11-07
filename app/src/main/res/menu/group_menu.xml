@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu   android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/change_group_name"
+        android:title="@string/change_group_name"/>
+    <item
+        android:id="@+id/change_display_name"
+        android:title="@string/change_display_name"/>
+    <item
+        android:id="@+id/leave_group"
+        android:title="@string/leave_group"/>
+    <item
+        android:id="@+id/delete_group"
+        android:title="@string/delete_group"/>
+</menu>

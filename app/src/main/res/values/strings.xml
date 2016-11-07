@@ -50,6 +50,19 @@
 
     <string name="cancel">Cancel</string>
 
+    <string name="rename">Rename</string>
+    <string name="leave">Leave</string>
+    <string name="delete">Delete</string>
+
+    <string name="change_group_name">Rename Group</string>
+    <string name="change_display_name">Change Display Name</string>
+    <string name="delete_group">Delete Group</string>
+    <string name="delete_group_title">Are you sure you want to delete the group?</string>
+    <string name="delete_group_confirmation">If you delete the group, it will be lost forever!</string>
+    <string name="leave_group">Leave Group</string>
+    <string name="leave_group_title">Are you sure you want to leave the group?</string>
+    <string name="leave_group_confirmation">If you are the last one in the group, the group will be deleted.</string>
+
     <string name="firebase_db_groups">groups</string>
     <string name="firebase_db_members">members</string>
     <string name="firebase_db_group_name">group_name</string>

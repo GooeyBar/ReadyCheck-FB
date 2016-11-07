@@ -3,11 +3,15 @@ package com.gooeybar.readycheck.base;
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.gooeybar.readycheck.R;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -28,8 +32,9 @@ public class BaseActivity extends AppCompatActivity {
     public void setupAds() {
         MobileAds.initialize(getApplicationContext(), admob_id);
 
-        AdView mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().addTestDevice("865AFC43CD58F1D5FB99158B5335F61A").build();
+        final AdView mAdView = (AdView) findViewById(R.id.adView);
+        final AdRequest adRequest = new AdRequest.Builder().addTestDevice("865AFC43CD58F1D5FB99158B5335F61A").build();
+
         mAdView.loadAd(adRequest);
     }
 
