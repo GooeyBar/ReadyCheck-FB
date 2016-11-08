@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.FloatingActionButton;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,12 +24,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gooeybar.readycheck.R;
 import com.gooeybar.readycheck.base.BaseActivity;
 import com.gooeybar.readycheck.group.GroupActivity;
+import com.gooeybar.readycheck.listener.DialogValidInputTextWatcher;
 import com.gooeybar.readycheck.listener.GroupItemValueEventListener;
 import com.gooeybar.readycheck.model.GroupItem;
 import com.gooeybar.readycheck.model.State;
@@ -255,7 +261,13 @@ public class LobbyActivity extends BaseActivity {
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+
+        inputGroupId.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources(), inputDisplayName));
+
+        inputDisplayName.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources(), inputGroupId));
     }
 
     private void createGroupDialog() {
@@ -360,7 +372,13 @@ public class LobbyActivity extends BaseActivity {
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+
+        inputGroupName.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources(), inputDisplayName));
+
+        inputDisplayName.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources(), inputGroupName));
     }
 
     @Override

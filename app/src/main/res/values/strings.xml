@@ -54,6 +54,8 @@
     <string name="leave">Leave</string>
     <string name="delete">Delete</string>
 
+    <string name="invalid_name">Cannot be empty or contain slashes.</string>
+
     <string name="change_group_name">Rename Group</string>
     <string name="change_display_name">Change Display Name</string>
     <string name="delete_group">Delete Group</string>

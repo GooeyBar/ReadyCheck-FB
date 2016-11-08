@@ -25,12 +25,15 @@ android:weightSum="20">
             android:layout_height="30dp"
             android:text="Group Name"
             android:gravity="center"
+            android:textSize="16dp"
+            android:textColor="@color/text_color"
             android:id="@+id/group_name_text" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:text="20/28 Ready"
+            android:textColor="@color/text_color"
             android:gravity="center"
             android:id="@+id/status_fraction_text" />
 

@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,7 +27,9 @@ import com.gooeybar.readycheck.R;
 import com.gooeybar.readycheck.base.BaseActivity;
 import com.gooeybar.readycheck.custom_views.ViewWeightAnimationWrapper;
 import com.gooeybar.readycheck.handler.DeleteNodeTransactionHandler;
+import com.gooeybar.readycheck.handler.LeaveGroupTransactionHandler;
 import com.gooeybar.readycheck.handler.RenameNodeTransactionHandler;
+import com.gooeybar.readycheck.listener.DialogValidInputTextWatcher;
 import com.gooeybar.readycheck.model.MemberItem;
 import com.gooeybar.readycheck.model.State;
 import com.google.firebase.database.DataSnapshot;
@@ -89,6 +93,12 @@ public class GroupActivity extends BaseActivity {
                 mGroupsRef.child(groupId).runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
+                        // check if group has been deleted
+                        if (mutableData.getValue() == null) {
+                            finish();
+                            return Transaction.abort();
+                        }
+
                         // set group ready status to PENDING
                         mutableData.child(getResources().getString(R.string.firebase_db_group_ready_status)).setValue(State.PENDING.getStatus());
 
@@ -155,13 +165,19 @@ public class GroupActivity extends BaseActivity {
 
         readyCheckLayout = (LinearLayout) findViewById(R.id.ready_check_layout);
 
-        getMembers();
+        initializeFirebaseMembersListener();
     }
 
-    private void getMembers() {
+    private void initializeFirebaseMembersListener() {
         mGroupsRef.child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                // check if group has been deleted
+                if (dataSnapshot.getValue() == null) {
+                    finish();
+                    return;
+                }
+
                 groupName = dataSnapshot.child(getResources().getString(R.string.firebase_db_group_name)).getValue(String.class);
 
                 setTitle(groupName);
@@ -296,7 +312,7 @@ public class GroupActivity extends BaseActivity {
             public void onClick(final DialogInterface dialogInterface, int which) {
                 final String newGroupName = inputGroupName.getText().toString();
 
-                mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_group_name)).runTransaction(new RenameNodeTransactionHandler(newGroupName));
+                mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_group_name)).runTransaction(new RenameNodeTransactionHandler(newGroupName.trim()));
         }});
 
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -306,7 +322,9 @@ public class GroupActivity extends BaseActivity {
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.show();
+
+        inputGroupName.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources()));
     }
 
     private void changeDisplayNameDialog() {
@@ -353,7 +371,9 @@ public class GroupActivity extends BaseActivity {
             }
         });
 
-        builder.show();
+        final AlertDialog dialog = builder.show();
+
+        inputDisplayName.addTextChangedListener(new DialogValidInputTextWatcher(dialog, getResources()));
     }
 
     private void leaveGroupDialog() {
@@ -367,7 +387,7 @@ public class GroupActivity extends BaseActivity {
             public void onClick(final DialogInterface dialogInterface, int which) {
                 mMembersRef.child(firebaseUid).child(groupId).runTransaction(new DeleteNodeTransactionHandler());
 
-                mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_members)).child(firebaseUid).runTransaction(new DeleteNodeTransactionHandler());
+                mGroupsRef.child(groupId).runTransaction(new LeaveGroupTransactionHandler(getResources(), firebaseUid));
 
                 finish();
             }});
@@ -393,18 +413,19 @@ public class GroupActivity extends BaseActivity {
             public void onClick(final DialogInterface dialogInterface, int which) {
                 mMembersRef.child(firebaseUid).child(groupId).runTransaction(new DeleteNodeTransactionHandler());
 
-                mGroupsRef.child(groupId).child(getResources().getString(R.string.firebase_db_members)).runTransaction(new Transaction.Handler() {
+                mGroupsRef.child(groupId).runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
-                        // delete the group id from the member
-                        mutableData.setValue(null);
-
-                        for (MutableData memberMutableData : mutableData.getChildren()) {
+                        MutableData membersMutableData = mutableData.child(getResources().getString(R.string.firebase_db_members));
+                        for (MutableData memberMutableData : membersMutableData.getChildren()) {
                             String memberID = memberMutableData.getKey();
                             memberMutableData.setValue(null);
 
                             mMembersRef.child(memberID).child(groupId).runTransaction(new DeleteNodeTransactionHandler());
                         }
+
+                        // delete the group id from the member
+                        mutableData.setValue(null);
 
                         return Transaction.success(mutableData);
                     }

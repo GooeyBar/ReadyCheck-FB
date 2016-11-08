@@ -15,6 +15,5 @@ public class DeleteNodeTransactionHandler implements Transaction.Handler {
 
     @Override
     public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-
     }
 }

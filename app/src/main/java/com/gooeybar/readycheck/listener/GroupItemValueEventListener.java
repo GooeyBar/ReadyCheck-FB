@@ -60,6 +60,9 @@ public class GroupItemValueEventListener implements ValueEventListener {
             mGroupRef.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        return Transaction.abort();
+                    }
                     mutableData.child(resources.getString(R.string.firebase_db_group_ready_status)).setValue(State.PENDING.getStatus());
 
                     return Transaction.success(mutableData);
@@ -75,6 +78,9 @@ public class GroupItemValueEventListener implements ValueEventListener {
             mGroupRef.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        return Transaction.abort();
+                    }
                     mutableData.child(resources.getString(R.string.firebase_db_group_ready_status)).setValue(State.NOT_READY.getStatus());
 
                     return Transaction.success(mutableData);
@@ -93,6 +99,9 @@ public class GroupItemValueEventListener implements ValueEventListener {
             mGroupRef.runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {
+                    if (mutableData.getValue() == null) {
+                        return Transaction.abort();
+                    }
                     mutableData.child(resources.getString(R.string.firebase_db_group_ready_status)).setValue(State.READY.getStatus());
 
                     return Transaction.success(mutableData);
